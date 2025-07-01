@@ -1,6 +1,7 @@
 # FlyAI
 
-A simple command line prototype for drone-based farming operations.
+A simple prototype for drone-based farming operations. It now includes a minimal
+web interface built with Python's standard library.
 
 ## Features
 - User registration with mobile number and OTP (Hindi prompts)
@@ -8,9 +9,14 @@ A simple command line prototype for drone-based farming operations.
 - View booking history and status
 - Static help/contact information
 
-## Running the app
+## Running the CLI version
 ```bash
 python3 app/flyai.py
+```
+
+## Running the web version
+```bash
+python3 app/webapp.py
 ```
 
 ## Running tests
