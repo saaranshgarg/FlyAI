@@ -171,13 +171,31 @@ class FlyAIHandler(BaseHTTPRequestHandler):
         unit_select = "<select name='field_unit'>" + ''.join([
             f"<option value='{val}'>{disp}</option>" for val, disp in unit_options
         ]) + "</select>"
+        # Region options localized
+        if lang == 'hi':
+            region_options = [
+                ('हिमाचल', 'हिमाचल'),
+                ('उत्तर प्रदेश', 'उत्तर प्रदेश'),
+                ('हरियाणा', 'हरियाणा'),
+                ('उत्तराखंड', 'उत्तराखंड'),
+            ]
+        else:
+            region_options = [
+                ('Himachal', 'Himachal'),
+                ('Uttar Pradesh', 'Uttar Pradesh'),
+                ('Haryana', 'Haryana'),
+                ('Uttarakhand', 'Uttarakhand'),
+            ]
+        region_select = f"<label>{msg['region']}<select name='region'>" + ''.join([
+            f"<option value='{val}'>{disp}</option>" for val, disp in region_options
+        ]) + "</select></label><br>"
         body += (
             "<form method='post'>"
             f"{crop_select}"
             f"<label>{msg['field_size']}<select name='field_size' style='width:6em;'>"
             + ''.join([f"<option value='{i}'>{i}</option>" for i in range(1, 16)])
             + f"</select> {unit_select}</label><br>"
-            f"<label>{msg['region']}<input name='region'></label><br>"
+            f"{region_select}"
             f"<label>{msg['datetime']}<input name='datetime'></label><br>"
             "<button type='submit'>Submit</button></form>"
         )
