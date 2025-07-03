@@ -139,9 +139,25 @@ class FlyAIHandler(BaseHTTPRequestHandler):
         lang = cookies_in.get('lang', 'en')
         msg = MESSAGES[lang]
         body = f"<h1>{msg['new_booking']}</h1>"
+        # Crop options localized
+        if lang == 'hi':
+            crop_options = [
+                ('सेब', 'सेब'),
+                ('टमाटर', 'टमाटर'),
+                ('फूलगोभी', 'फूलगोभी'),
+            ]
+        else:
+            crop_options = [
+                ('Apple', 'Apple'),
+                ('Tomato', 'Tomato'),
+                ('Cauliflower', 'Cauliflower'),
+            ]
+        crop_select = f"<label>{msg['crop']}<select name='crop'>" + ''.join([
+            f"<option value='{val}'>{disp}</option>" for val, disp in crop_options
+        ]) + "</select></label><br>"
         body += (
             "<form method='post'>"
-            f"<label>{msg['crop']}<input name='crop'></label><br>"
+            f"{crop_select}"
             f"<label>{msg['field_size']}<input name='field_size'></label><br>"
             f"<label>{msg['region']}<input name='region'></label><br>"
             f"<label>{msg['datetime']}<input name='datetime'></label><br>"
