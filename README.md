@@ -12,6 +12,9 @@ The app supports both English and Hindi.
 - Bigger, centered text in the web interface
 
 ## Running the CLI version
+A simple command line prototype for drone-based farming operations.
+
+## Running the app
 ```bash
 python3 app/flyai.py
 ```

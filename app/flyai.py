@@ -135,11 +135,9 @@ def create_booking(data):
 
 
 def show_history(data):
-    lang = data.get('user', {}).get('language', 'en')
-    msg = MESSAGES[lang]
-    print(f"\n{msg['history']}")
+    print("\n*** बुकिंग इतिहास ***")
     if not data['bookings']:
-        print(msg['none'])
+        print("कोई बुकिंग नहीं।")
         return
     for b in data['bookings']:
         print(f"#{b['id']} | {b['crop']} | {b['field_size']}ha | {b['region']} | {b['datetime']} | {b['status']}")
