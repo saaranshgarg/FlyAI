@@ -45,6 +45,20 @@ class FlyAIHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'Not found')
                 return
+        if self.path.startswith('/date_dropdown.js'):
+            js_path = os.path.join(os.path.dirname(__file__), 'date_dropdown.js')
+            if os.path.exists(js_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/javascript; charset=utf-8')
+                self.end_headers()
+                with open(js_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Not found')
+                return
         if self.path.startswith('/register'):
             self.show_register()
         elif self.path.startswith('/book'):
@@ -261,6 +275,20 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
 </script>
 <script src='address_dropdown.js'></script>
 """
+        import datetime as dt
+        now = dt.datetime.now()
+        # Show years up to 2029 or current year + 4, whichever is later
+        max_year = max(now.year + 4, 2029)
+        years = list(range(now.year, max_year + 1))
+        months = list(range(1, 13))
+        days = list(range(1, 32))
+        times = [f"{h:02d}:00" for h in range(8, 19)]
+        year_select = f"<label>Year <select id='year' name='year'>" + ''.join([f"<option value='{y}'>{y}</option>" for y in years]) + "</select></label>"
+        month_select = f"<label>Month <select id='month' name='month'>" + ''.join([f"<option value='{m:02d}'>{m:02d}</option>" for m in months]) + "</select></label>"
+        day_select = f"<label>Day <select id='day' name='day'>" + ''.join([f"<option value='{d:02d}'>{d:02d}</option>" for d in days]) + "</select></label>"
+        time_select = f"<label>Time <select name='time'>" + ''.join([f"<option value='{t}'>{t}</option>" for t in times]) + "</select></label>"
+        datetime_label = msg['datetime'] if 'datetime' in msg else 'Date & Time'
+        datetime_select = f"<div style='display:flex;gap:0.5em;justify-content:center;align-items:center;margin-bottom:0.5em;'>{datetime_label} {year_select} {month_select} {day_select} {time_select}</div>"
         body += (
             js_block +
             "<form method='post'>"
@@ -271,7 +299,7 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
             f"{region_select}"
             f"{district_select}"
             f"{village_select}"
-            f"<label>{msg['datetime']}<input name='datetime'></label><br>"
+            f"{datetime_select}"
             "<button type='submit'>Submit</button></form>"
         )
         if error:
@@ -289,8 +317,13 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
         if not cookies_in.get('user'):
             return self.redirect('/register')
         lang = cookies_in.get('lang', 'en')
+        year = params.get('year', [''])[0]
+        month = params.get('month', [''])[0]
+        day = params.get('day', [''])[0]
+        time_ = params.get('time', [''])[0]
         try:
-            dt = datetime.strptime(params.get('datetime', [''])[0], '%Y-%m-%d %H:%M')
+            dt_str = f"{year}-{month}-{day} {time_}"
+            dt_val = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
         except ValueError:
             return self.show_book(error=MESSAGES[lang]['bad_date'])
         data = self.server.data
@@ -299,7 +332,9 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
             'crop': params.get('crop', [''])[0],
             'field_size': params.get('field_size', [''])[0],
             'region': params.get('region', [''])[0],
-            'datetime': dt.strftime('%Y-%m-%d %H:%M'),
+            'district': params.get('district', [''])[0],
+            'village': params.get('village', [''])[0],
+            'datetime': dt_val.strftime('%Y-%m-%d %H:%M'),
             'status': 'Scheduled'
         }
         data['bookings'].append(booking)
