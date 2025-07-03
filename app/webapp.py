@@ -1,4 +1,5 @@
 # Minimal web server for FlyAI using only standard library
+import json
 import os
 import random
 from datetime import datetime
@@ -29,6 +30,21 @@ def format_html(body: str, lang: str = 'en') -> bytes:
 
 class FlyAIHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # Serve static files (e.g., JS)
+        if self.path.startswith('/address_dropdown.js'):
+            js_path = os.path.join(os.path.dirname(__file__), 'address_dropdown.js')
+            if os.path.exists(js_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/javascript; charset=utf-8')
+                self.end_headers()
+                with open(js_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Not found')
+                return
         if self.path.startswith('/register'):
             self.show_register()
         elif self.path.startswith('/book'):
@@ -186,16 +202,75 @@ class FlyAIHandler(BaseHTTPRequestHandler):
                 ('Haryana', 'Haryana'),
                 ('Uttarakhand', 'Uttarakhand'),
             ]
-        region_select = f"<label>{msg['region']}<select name='region'>" + ''.join([
+        village_data = {
+            'en': {
+                'Himachal': {
+                    'Shimla': ['Mashobra', 'Rampur', 'Chopal'],
+                    'Kangra': ['Dharamshala', 'Palampur', 'Nagrota'],
+                    'Mandi': ['Sundernagar', 'Jogindernagar', 'Karsog'],
+                },
+                'Uttar Pradesh': {
+                    'Lucknow': ['Gosainganj', 'Malihabad', 'Bakshi Ka Talab'],
+                    'Kanpur': ['Bilhaur', 'Ghatampur', 'Sarsaul'],
+                    'Varanasi': ['Cholapur', 'Araziline', 'Pindra'],
+                },
+                'Haryana': {
+                    'Gurgaon': ['Sikanderpur', 'Badshahpur', 'Manesar'],
+                    'Faridabad': ['Ballabgarh', 'Tigaon', 'Pali'],
+                    'Panipat': ['Samalkha', 'Israna', 'Bapoli'],
+                },
+                'Uttarakhand': {
+                    'Dehradun': ['Raipur', 'Vikasnagar', 'Doiwala'],
+                    'Haridwar': ['Roorkee', 'Laksar', 'Bhagwanpur'],
+                    'Nainital': ['Haldwani', 'Ramgarh', 'Betalghat'],
+                },
+            },
+            'hi': {
+                'हिमाचल': {
+                    'शिमला': ['मशोबरा', 'रामपुर', 'चौपाल'],
+                    'कांगड़ा': ['धर्मशाला', 'पालमपुर', 'नगरोटा'],
+                    'मंडी': ['सुंदरनगर', 'जोगिंदरनगर', 'करसोग'],
+                },
+                'उत्तर प्रदेश': {
+                    'लखनऊ': ['गोसाईगंज', 'मलिहाबाद', 'बक्शी का तालाब'],
+                    'कानपुर': ['बिल्हौर', 'घाटमपुर', 'सरसौल'],
+                    'वाराणसी': ['चोलापुर', 'अराजीलाइन', 'पिंडरा'],
+                },
+                'हरियाणा': {
+                    'गुड़गांव': ['सिकंदरपुर', 'बादशाहपुर', 'मानेसर'],
+                    'फरीदाबाद': ['बल्लभगढ़', 'टिगांव', 'पाली'],
+                    'पानीपत': ['समालखा', 'इसराना', 'बापोली'],
+                },
+                'उत्तराखंड': {
+                    'देहरादून': ['रायपुर', 'विकासनगर', 'डोईवाला'],
+                    'हरिद्वार': ['रुड़की', 'लक्सर', 'भगवानपुर'],
+                    'नैनीताल': ['हल्द्वानी', 'रामगढ़', 'बेतालघाट'],
+                },
+            }
+        }
+        region_select = f"<label>{msg['region']}<select id='state' name='region'>" + ''.join([
             f"<option value='{val}'>{disp}</option>" for val, disp in region_options
         ]) + "</select></label><br>"
+        district_label = 'District' if lang == 'en' else 'जनपद'
+        district_select = f"<label>{district_label}<select id='district' name='district'></select></label><br>"
+        village_label = 'Village' if lang == 'en' else 'गांव'
+        village_select = f"<label>{village_label}<select id='village' name='village'></select></label><br>"
+        js_block = f"""
+<script>
+const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
+</script>
+<script src='address_dropdown.js'></script>
+"""
         body += (
+            js_block +
             "<form method='post'>"
             f"{crop_select}"
             f"<label>{msg['field_size']}<select name='field_size' style='width:6em;'>"
             + ''.join([f"<option value='{i}'>{i}</option>" for i in range(1, 16)])
             + f"</select> {unit_select}</label><br>"
             f"{region_select}"
+            f"{district_select}"
+            f"{village_select}"
             f"<label>{msg['datetime']}<input name='datetime'></label><br>"
             "<button type='submit'>Submit</button></form>"
         )
