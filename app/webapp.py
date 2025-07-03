@@ -155,10 +155,28 @@ class FlyAIHandler(BaseHTTPRequestHandler):
         crop_select = f"<label>{msg['crop']}<select name='crop'>" + ''.join([
             f"<option value='{val}'>{disp}</option>" for val, disp in crop_options
         ]) + "</select></label><br>"
+        # Field size unit options localized
+        if lang == 'hi':
+            unit_options = [
+                ('बीघा', 'बीघा'),
+                ('कनाल', 'कनाल'),
+                ('एकड़', 'एकड़'),
+            ]
+        else:
+            unit_options = [
+                ('Bigha', 'Bigha'),
+                ('Kanal', 'Kanal'),
+                ('Acre', 'Acre'),
+            ]
+        unit_select = "<select name='field_unit'>" + ''.join([
+            f"<option value='{val}'>{disp}</option>" for val, disp in unit_options
+        ]) + "</select>"
         body += (
             "<form method='post'>"
             f"{crop_select}"
-            f"<label>{msg['field_size']}<input name='field_size'></label><br>"
+            f"<label>{msg['field_size']}<select name='field_size' style='width:6em;'>"
+            + ''.join([f"<option value='{i}'>{i}</option>" for i in range(1, 16)])
+            + f"</select> {unit_select}</label><br>"
             f"<label>{msg['region']}<input name='region'></label><br>"
             f"<label>{msg['datetime']}<input name='datetime'></label><br>"
             "<button type='submit'>Submit</button></form>"
