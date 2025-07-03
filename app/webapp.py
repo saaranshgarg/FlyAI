@@ -6,15 +6,23 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 from http import cookies
 
-from .flyai import load_data, save_data, MESSAGES
+from flyai import load_data, save_data, MESSAGES
 
 
 def format_html(body: str, lang: str = 'en') -> bytes:
-    """Wrap body in basic HTML structure with simple styling."""
-    style = "<style>body{font-family:sans-serif;font-size:1.5em;text-align:center;}</style>"
+    """Wrap body in basic HTML structure with simple styling and add language toggle."""
+    style = "<style>body{font-family:sans-serif;font-size:1.5em;text-align:center;}#lang-toggle{position:fixed;top:10px;right:10px;font-size:1em;z-index:1000;}</style>"
+    # Add a language toggle form always visible at top right
+    toggle = f'''
+    <form id="lang-toggle" method="post" action="/toggle-lang">
+        <select name="lang" onchange="this.form.submit()">
+            <option value="en"{' selected' if lang=='en' else ''}>English</option>
+            <option value="hi"{' selected' if lang=='hi' else ''}>हिन्दी</option>
+        </select>
+    </form>'''
     html = (
         f"<!doctype html><html lang='{lang}'><meta charset='utf-8'>" +
-        style + f"<body>{body}</body></html>"
+        style + f"<body>{toggle}{body}</body></html>"
     )
     return html.encode('utf-8')
 
@@ -36,7 +44,16 @@ class FlyAIHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(length).decode()
         params = parse_qs(body)
-        if self.path.startswith('/register'):
+        if self.path == '/toggle-lang':
+            # Handle global language toggle
+            lang = params.get('lang', ['en'])[0]
+            self.send_response(302)
+            self.set_cookie('lang', lang)
+            # Redirect back to Referer or home
+            ref = self.headers.get('Referer', '/book')
+            self.send_header('Location', ref)
+            self.end_headers()
+        elif self.path.startswith('/register'):
             self.handle_register(params)
         elif self.path.startswith('/book'):
             self.handle_book(params)
