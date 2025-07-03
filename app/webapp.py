@@ -287,8 +287,25 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
         month_select = f"<label>Month <select id='month' name='month'>" + ''.join([f"<option value='{m:02d}'>{m:02d}</option>" for m in months]) + "</select></label>"
         day_select = f"<label>Day <select id='day' name='day'>" + ''.join([f"<option value='{d:02d}'>{d:02d}</option>" for d in days]) + "</select></label>"
         time_select = f"<label>Time <select name='time'>" + ''.join([f"<option value='{t}'>{t}</option>" for t in times]) + "</select></label>"
+        # Netting status dropdown
+        netting_label = 'Netting Status' if lang == 'en' else 'नेटिंग स्थिति'
+        netting_select = f"<label>{netting_label} <select name='netting_status'><option value='yes'>Yes</option><option value='no'>No</option></select></label><br>"
+        # Terrain type dropdown
+        terrain_label = 'Terrain Type' if lang == 'en' else 'भू-आकृति प्रकार'
+        terrain_select = f"<label>{terrain_label} <select name='terrain_type'><option value='flat'>Flat</option><option value='slope'>Slope</option><option value='steep'>Steep</option></select></label><br>"
         datetime_label = msg['datetime'] if 'datetime' in msg else 'Date & Time'
         datetime_select = f"<div style='display:flex;gap:0.5em;justify-content:center;align-items:center;margin-bottom:0.5em;'>{datetime_label} {year_select} {month_select} {day_select} {time_select}</div>"
+        # Type of spray dropdown localized
+        spray_type_options = [
+            ('fungicide', msg['spray_fungicide']),
+            ('insecticide', msg['spray_insecticide']),
+            ('foliar', msg['spray_foliar']),
+            ('custom', msg['spray_custom'])
+        ]
+        spray_type_select = f"<label>{msg['spray_type']} <select name='spray_type'>" + ''.join([
+            f"<option value='{val}'>{disp}</option>" for val, disp in spray_type_options
+        ]) + "</select></label><br>"
+
         body += (
             js_block +
             "<form method='post'>"
@@ -299,9 +316,14 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
             f"{region_select}"
             f"{district_select}"
             f"{village_select}"
+            f"{netting_select}"
+            f"{terrain_select}"
+            f"{spray_type_select}"
             f"{datetime_select}"
             "<button type='submit'>Submit</button></form>"
+            "<script src='date_dropdown.js'></script>"
         )
+
         if error:
             body += f"<p style='color:red'>{error}</p>"
         body += (
@@ -334,6 +356,28 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
             'region': params.get('region', [''])[0],
             'district': params.get('district', [''])[0],
             'village': params.get('village', [''])[0],
+            'netting_status': params.get('netting_status', [''])[0],
+            'terrain_type': params.get('terrain_type', [''])[0],
+            'spray_type': params.get('spray_type', [''])[0],
+            'datetime': dt_val.strftime('%Y-%m-%d %H:%M'),
+            'status': 'Scheduled'
+        }
+        data['bookings'].append(booking)
+        save_data(data)
+        self.send_response(302)
+        self.send_header('Location', '/history')
+        self.end_headers()
+        return self.show_book(error=MESSAGES[lang]['bad_date'])
+        data = self.server.data
+        booking = {
+            'id': len(data['bookings']) + 1,
+            'crop': params.get('crop', [''])[0],
+            'field_size': params.get('field_size', [''])[0],
+            'region': params.get('region', [''])[0],
+            'district': params.get('district', [''])[0],
+            'village': params.get('village', [''])[0],
+            'netting_status': params.get('netting_status', [''])[0],
+            'terrain_type': params.get('terrain_type', [''])[0],
             'datetime': dt_val.strftime('%Y-%m-%d %H:%M'),
             'status': 'Scheduled'
         }

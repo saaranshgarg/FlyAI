@@ -29,7 +29,12 @@ MESSAGES = {
         'menu_exit': 'Exit',
         'choose': 'Choose: ',
         'invalid': 'Invalid option.\n',
-        'register_first': 'Please register first.'
+        'register_first': 'Please register first.',
+        'spray_type': 'Type of spray:',
+        'spray_fungicide': 'Fungicide',
+        'spray_insecticide': 'Insecticide',
+        'spray_foliar': 'Foliar',
+        'spray_custom': 'Custom mix'
     },
     'hi': {
         'register_title': '*** उपयोगकर्ता पंजीकरण ***',
@@ -56,7 +61,12 @@ MESSAGES = {
         'menu_exit': 'बाहर निकलें',
         'choose': 'चयन करें: ',
         'invalid': 'अमान्य विकल्प।\n',
-        'register_first': 'कृपया पहले पंजीकरण करें।'
+        'register_first': 'कृपया पहले पंजीकरण करें।',
+        'spray_type': 'स्प्रे का प्रकार:',
+        'spray_fungicide': 'फफूंदनाशी',
+        'spray_insecticide': 'कीटनाशी',
+        'spray_foliar': 'फोलियर',
+        'spray_custom': 'कस्टम मिक्स'
     },
 }
 
