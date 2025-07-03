@@ -1,0 +1,37 @@
+{
+  "user": null,
+  "bookings": [
+    {
+      "id": 1,
+      "crop": "Tomato",
+      "field_size": "5",
+      "region": "Haryana",
+      "district": "Gurgaon",
+      "village": "Badshahpur",
+      "datetime": "2025-01-01 08:00",
+      "status": "Scheduled"
+    },
+    {
+      "id": 2,
+      "crop": "Apple",
+      "field_size": "1",
+      "region": "Himachal",
+      "district": "Shimla",
+      "village": "Mashobra",
+      "datetime": "2026-04-14 17:00",
+      "status": "Scheduled"
+    },
+    {
+      "id": 3,
+      "crop": "Apple",
+      "field_size": "1",
+      "region": "Himachal",
+      "district": "Shimla",
+      "village": "Mashobra",
+      "netting_status": "yes",
+      "terrain_type": "flat",
+      "datetime": "2025-07-04 08:00",
+      "status": "Scheduled"
+    }
+  ]
+}

@@ -12,7 +12,107 @@ from flyai import load_data, save_data, MESSAGES
 
 def format_html(body: str, lang: str = 'en') -> bytes:
     """Wrap body in basic HTML structure with simple styling and add language toggle."""
-    style = "<style>body{font-family:sans-serif;font-size:1.5em;text-align:center;}#lang-toggle{position:fixed;top:10px;right:10px;font-size:1em;z-index:1000;}</style>"
+    style = """
+    <style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1.15em;
+        text-align: center;
+        margin: 0;
+        background: #f8f9fa;
+    }
+    #lang-toggle {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        font-size: 1em;
+        z-index: 1000;
+    }
+    form.booking-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.1em;
+        background: #fff;
+        padding: 2em 2.5em;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin: 2em auto;
+        max-width: 440px;
+    }
+    .form-row {
+        display: flex;
+        align-items: center;
+        gap: 0.7em;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    label {
+        font-size: 1em;
+        min-width: 160px;
+        text-align: right;
+        margin-right: 0.7em;
+        font-weight: 500;
+    }
+    select, input {
+        font-size: 1em;
+        padding: 0.25em 0.7em;
+        border-radius: 5px;
+        border: 1px solid #bbb;
+        min-width: 120px;
+        background: #f4f4f4;
+    }
+    button[type='submit'] {
+        margin-top: 1.5em;
+        padding: 0.6em 2.2em;
+        font-size: 1.1em;
+        border-radius: 6px;
+        border: none;
+        background: #007bff;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button[type='submit']:hover {
+        background: #0056b3;
+    }
+    .history-list {
+        list-style: none;
+        padding: 0;
+        max-width: 700px;
+        margin: 2em auto;
+        text-align: left;
+    }
+    .history-list li {
+        background: #fff;
+        margin-bottom: 1em;
+        padding: 1em 1.5em;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        font-size: 1em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5em;
+    }
+    .history-pair {
+        display: flex;
+        gap: 0.4em;
+        align-items: center;
+        font-size: 1em;
+    }
+    .history-key {
+        font-weight: 500;
+        color: #333;
+    }
+    .history-colon {
+        margin: 0 0.1em;
+    }
+    .history-value {
+        color: #222;
+    }
+    </style>
+    """
     # Add a language toggle form always visible at top right
     toggle = f'''
     <form id="lang-toggle" method="post" action="/toggle-lang">
@@ -308,18 +408,18 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
 
         body += (
             js_block +
-            "<form method='post'>"
-            f"{crop_select}"
-            f"<label>{msg['field_size']}<select name='field_size' style='width:6em;'>"
+            "<form method='post' class='booking-form'>"
+            f"<div class='form-row'><label>{msg['crop']}</label>{crop_select}</div>"
+            f"<div class='form-row'><label>{msg['field_size']}</label><select name='field_size' style='width:6em;'>"
             + ''.join([f"<option value='{i}'>{i}</option>" for i in range(1, 16)])
-            + f"</select> {unit_select}</label><br>"
-            f"{region_select}"
-            f"{district_select}"
-            f"{village_select}"
-            f"{netting_select}"
-            f"{terrain_select}"
-            f"{spray_type_select}"
-            f"{datetime_select}"
+            + f"</select> {unit_select}</div>"
+            f"<div class='form-row'><label>{msg['region']}</label>{region_select}</div>"
+            f"<div class='form-row'><label>District</label>{district_select}</div>"
+            f"<div class='form-row'><label>Village</label>{village_select}</div>"
+            f"<div class='form-row'><label>{netting_label}</label>{netting_select}</div>"
+            f"<div class='form-row'><label>{terrain_label}</label>{terrain_select}</div>"
+            f"<div class='form-row'><label>{msg['spray_type']}</label>{spray_type_select}</div>"
+            f"<div class='form-row'><label>{datetime_label}</label>{year_select} {month_select} {day_select} {time_select}</div>"
             "<button type='submit'>Submit</button></form>"
             "<script src='date_dropdown.js'></script>"
         )
@@ -397,12 +497,13 @@ const VILLAGE_DATA = {json.dumps(village_data[lang], ensure_ascii=False)};
         body = f"<h1>{msg['history']}</h1>"
         if not data['bookings']:
             body += f"<p>{msg['none']}</p>"
-        else:
-            body += '<ul>'
-            for b in data['bookings']:
-                item = f"#{b['id']} | {b['crop']} | {b['field_size']}ha | {b['region']} | {b['datetime']} | {b['status']}"
-                body += f'<li>{item}</li>'
-            body += '</ul>'
+        items = []
+        for b in reversed(data['bookings']):
+            pairs = []
+            for k, v in b.items():
+                pairs.append(f"<span class='history-pair'><span class='history-key'>{k}</span><span class='history-colon'>:</span><span class='history-value'>{v}</span></span>")
+            items.append(f"<li>{' '.join(pairs)}</li>")
+        body += f"<ul class='history-list'>{''.join(items)}</ul>"
         body += f"<p><a href='/book'>{msg['menu_booking']}</a> | <a href='/help'>{msg['menu_help']}</a></p>"
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
