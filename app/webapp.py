@@ -319,7 +319,7 @@ class FlyAIHandler(BaseHTTPRequestHandler):
         village_data = {
             'en': {
                 'Himachal': {
-                    'Shimla': ['Mashobra', 'Rampur', 'Chopal'],
+                    'Shimla': ['Mashobra', 'Rampur', 'Chopal', 'Naldehra', 'Kufri', 'Fagu', 'Theog', 'Kotkhai', 'Rohru', 'Jubbal', 'Narkanda', 'Summerhill', 'Dhalli'],
                     'Kangra': ['Dharamshala', 'Palampur', 'Nagrota'],
                     'Mandi': ['Sundernagar', 'Jogindernagar', 'Karsog'],
                 },
@@ -341,7 +341,7 @@ class FlyAIHandler(BaseHTTPRequestHandler):
             },
             'hi': {
                 'हिमाचल': {
-                    'शिमला': ['मशोबरा', 'रामपुर', 'चौपाल'],
+                    'शिमला': ['मशोबरा', 'रामपुर', 'चौपाल', 'नालदेहरा', 'कुफरी', 'फागू', 'ठियोग', 'कोटखाई', 'रोहरू', 'जुब्बल', 'नारकंडा', 'समरहिल', 'ढली'],
                     'कांगड़ा': ['धर्मशाला', 'पालमपुर', 'नगरोटा'],
                     'मंडी': ['सुंदरनगर', 'जोगिंदरनगर', 'करसोग'],
                 },
